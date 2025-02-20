@@ -214,16 +214,18 @@ const resetForm = () => {
 };
 
 const validateTask = (task: Task) => {
-  const specialCharPattern = /[!@#$%^&*-_(),.?":{}|<>]/g;
+  const specialCharPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+  console.log('Validating task:', task);
   if (!task.title.trim() || !task.description.trim()) {
+    console.log('Validation failed: title or description is empty');
     return false;
   }
   if (specialCharPattern.test(task.title) || specialCharPattern.test(task.description)) {
+    console.log('Validation failed: title or description contains special characters');
     return false;
   }
   return true;
 };
-
 const submitTask = (newTask: Task) => {
   if (!validateTask(newTask)) {
     Swal.fire({

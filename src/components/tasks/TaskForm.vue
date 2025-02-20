@@ -1,5 +1,4 @@
-<!-- filepath: /c:/Users/cgjos/OneDrive/Documentos/actividad_1_Notas/src/components/tasks/TaskForm.vue -->
-<template>
+  <template>
   <form @submit.prevent="submitTask" class="mt-4">
     <div class="space-y-2">
       <label for="title" class="block text-sm font-medium text-gray-700">Título <span
