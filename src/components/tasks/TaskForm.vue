@@ -1,29 +1,31 @@
-  <template>
+<template>
   <form @submit.prevent="submitTask" class="mt-4">
     <div class="space-y-2">
       <label for="title" class="block text-sm font-medium text-gray-700">Título <span
           class="text-red-700">*</span></label>
       <input v-model="task.title" id="title" type="text" required placeholder="Ingrese el título de la tarea"
+        @blur="touched.title = true"
         class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
-      <p v-if="errors.title" class="text-red-500 text-sm">{{ errors.title }}</p>
+      <p v-if="touched.title && errors.title" class="text-red-500 text-sm">{{ errors.title }}</p>
     </div>
 
     <div class="space-y-2 mt-2">
       <label for="description" class="block text-sm font-medium text-gray-700">Descripción</label>
       <textarea v-model="task.description" id="description" rows="3" placeholder="Añade una descripción"
+        @blur="touched.description = true"
         class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"></textarea>
-      <p v-if="errors.description" class="text-red-500 text-sm">{{ errors.description }}</p>
+      <p v-if="touched.description && errors.description" class="text-red-500 text-sm">{{ errors.description }}</p>
     </div>
 
     <div class="space-y-2 mt-2">
       <label class="block text-sm font-medium text-gray-700">Categorías</label>
-      <div class="overflow-y-auto max-h-28 border border-gray-300 rounded p-2">
+      <div class="overflow-y-auto max-h-22 border border-gray-300 rounded p-2">
         <div v-for="tag in tags" :key="tag.id" class="flex items-center">
-          <input type="checkbox" :value="tag.name" v-model="task.categories" class="mr-2">
+          <input type="checkbox" :value="tag.name" v-model="task.categories" @change="touched.categories = true" class="mr-2">
           <span>{{ tag.name }}</span>
         </div>
       </div>
-      <p v-if="errors.categories" class="text-red-500 text-sm">{{ errors.categories }}</p>
+      <p v-if="touched.categories && errors.categories" class="text-red-500 text-sm">{{ errors.categories }}</p>
     </div>
 
     <div class="flex gap-3">
@@ -53,14 +55,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 const props = defineProps({
   task: {
-    type: Object,
-    required: true,
-  },
-  errors: {
     type: Object,
     required: true,
   },
@@ -72,10 +70,14 @@ const props = defineProps({
 
 const emit = defineEmits(['submitTask', 'closeModal']);
 
-// Usa una copia reactiva de la tarea
 const task = ref({ ...props.task });
 
-// Si la tarea cambia (por ejemplo, al abrir el modal), actualiza la copia reactiva
+const touched = ref({
+  title: false,
+  description: false,
+  categories: false,
+});
+
 watch(
   () => props.task,
   (newTask) => {
@@ -84,8 +86,37 @@ watch(
   { deep: true }
 );
 
+const specialCharPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+
+const errors = computed(() => {
+  const errs: { [key: string]: string } = {};
+  if (!task.value.title.trim()) {
+    errs.title = 'El título no puede estar vacío.';
+  } else if (specialCharPattern.test(task.value.title)) {
+    errs.title = 'El título no puede contener caracteres especiales.';
+  }
+
+  if (!task.value.description.trim()) {
+    errs.description = 'La descripción no puede estar vacía.';
+  } else if (specialCharPattern.test(task.value.description)) {
+    errs.description = 'La descripción no puede contener caracteres especiales.';
+  }
+
+  if (task.value.categories.length === 0) {
+    errs.categories = 'Debe seleccionar al menos una categoría.';
+  }
+
+  return errs;
+});
+
 const submitTask = () => {
-  emit('submitTask', task.value); // Envía el objeto `task` actualizado
+  touched.value.title = true;
+  touched.value.description = true;
+  touched.value.categories = true;
+
+  if (Object.keys(errors.value).length === 0) {
+    emit('submitTask', task.value); 
+  }
 };
 
 const closeModal = () => {

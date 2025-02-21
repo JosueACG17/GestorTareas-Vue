@@ -34,7 +34,7 @@
 
           <ModalForm :isOpen="isModalOpen" :title="isEditing ? 'Editar Etiqueta' : 'Agregar Etiqueta'"
             @close="closeModal">
-            <TagForm :isEditing="isEditing" :tagToEdit="tagToEdit" @submit-form="handleSubmit" @close-form="closeModal" />
+            <TagForm :isEditing="isEditing" :tagToEdit="tagToEdit  || {}" @submit-form="handleSubmit" @close-form="closeModal" />
           </ModalForm>
         </div>
       </div>

@@ -2,13 +2,9 @@
   <main class="p-8 h-screen">
     <div class="bg-white rounded-3xl shadow-lg">
       <div class="px-4 md:px-10 py-4 md:py-7">
-        <!-- Header -->
         <Header :taskCount="taskStore.tasks.length" @openModal="openModal" @confirmClearTasks="confirmClearTasks" />
-
-        <!-- Search Bar -->
         <SearchBar v-model="searchQuery" />
 
-        <!-- Search Results -->
         <ul v-if="searchQuery" class="bg-white border rounded-lg shadow-md max-h-60 overflow-y-auto mt-2">
           <li v-for="task in globalFilteredTasks" :key="task.id" @click="openTaskModal(task)"
             class="px-4 py-2 hover:bg-blue-100 cursor-pointer">
@@ -19,14 +15,12 @@
         <CategoryFilter :tags="tagStore.tags" :taskCount="taskStore.tasks.length" :selectedCategory="selectedCategory"
           @setCategory="setCategory" @clearSection="clearSection" />
 
-        <!-- Task List -->
         <div v-if="filteredTasks.length" class="mt-7 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div v-for="task in filteredTasks" :key="task.id" @click="openTaskModal(task)"
             class="border border-gray-200 rounded-lg p-4 shadow-lg">
             <div class="flex justify-between items-center mb-2">
               <h3 class="text-lg font-semibold text-gray-800">{{ task.title }}</h3>
               <div class="flex gap-2">
-                <!-- Botón de editar -->
                 <button @click.stop="openEditModal(task)" class="cursor-pointer">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-6">
@@ -34,7 +28,6 @@
                       d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                   </svg>
                 </button>
-                <!-- Botón de eliminar -->
                 <button @click.stop="confirmDeleteTask(task.id)" class="cursor-pointer">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-6">
@@ -95,20 +88,17 @@
   </main>
 
 
-  <!-- Task Details Modal -->
   <ModalForm :isOpen="isTaskModalOpen" title="Detalles de la Tarea" @close="closeTaskModal">
     <TaskDetailsModal :selectedTask="selectedTask" />
   </ModalForm>
 
-  <!-- Add Task Modal -->
   <ModalForm :isOpen="isModalOpen" title="Agregar Tarea" @close="closeModal">
-    <TaskForm :task="task" :errors="formSubmitted ? errors : {}" :tags="tagStore.tags" @submitTask="submitTask"
+    <TaskForm :task="task" :tags="tagStore.tags" @submitTask="submitTask"
       @closeModal="closeModal" />
   </ModalForm>
 
-  <!-- Edit Task Modal -->
   <ModalForm :isOpen="isEditModalOpen" title="Editar Tarea" @close="closeEditModal">
-    <TaskForm :task="taskToEdit" :errors="formSubmitted ? errors : {}" :tags="tagStore.tags" @submitTask="updateTask"
+    <TaskForm :task="taskToEdit || {}" :tags="tagStore.tags" @submitTask="updateTask"
       @closeModal="closeEditModal" />
   </ModalForm>
 </template>
@@ -150,7 +140,6 @@ const task = ref({
   dueDate: '',
 });
 
-// Computed
 const filteredTasks = computed(() => {
   let tasks = taskStore.tasks;
 
@@ -174,7 +163,6 @@ const globalFilteredTasks = computed(() => {
   return tasks;
 });
 
-// Métodos
 const setCategory = (category: string) => {
   selectedCategory.value = category;
 };
@@ -213,29 +201,7 @@ const resetForm = () => {
   task.value = { title: '', description: '', categories: [], startDate: '', dueDate: '' };
 };
 
-const validateTask = (task: Task) => {
-  const specialCharPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-  console.log('Validating task:', task);
-  if (!task.title.trim() || !task.description.trim()) {
-    console.log('Validation failed: title or description is empty');
-    return false;
-  }
-  if (specialCharPattern.test(task.title) || specialCharPattern.test(task.description)) {
-    console.log('Validation failed: title or description contains special characters');
-    return false;
-  }
-  return true;
-};
 const submitTask = (newTask: Task) => {
-  if (!validateTask(newTask)) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Por favor, completa todos los campos requeridos sin espacios en blanco o caracteres especiales.',
-    });
-    return;
-  }
-
   taskStore.addTask({
     ...newTask,
     completed: false,
@@ -249,15 +215,6 @@ const submitTask = (newTask: Task) => {
 };
 
 const updateTask = (updatedTask: Task) => {
-  if (!validateTask(updatedTask)) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Por favor, completa todos los campos requeridos sin espacios en blanco o caracteres especiales.',
-    });
-    return;
-  }
-
   taskStore.updateTask(updatedTask);
   closeEditModal();
   Swal.fire({
