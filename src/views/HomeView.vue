@@ -12,6 +12,11 @@
           </li>
         </ul>
 
+        <select v-model="selectedOrder" class="px-4 py-2 border border-gray-300 rounded-lg mt-2">
+          <option value="asc">Más antiguas primero</option>
+          <option value="desc">Más recientes primero</option>
+        </select>
+
         <CategoryFilter :tags="tagStore.tags" :taskCount="taskStore.tasks.length" :selectedCategory="selectedCategory"
           @setCategory="setCategory" @clearSection="clearSection" />
 
@@ -93,13 +98,11 @@
   </ModalForm>
 
   <ModalForm :isOpen="isModalOpen" title="Agregar Tarea" @close="closeModal">
-    <TaskForm :task="task" :tags="tagStore.tags" @submitTask="submitTask"
-      @closeModal="closeModal" />
+    <TaskForm :task="task" :tags="tagStore.tags" @submitTask="submitTask" @closeModal="closeModal" />
   </ModalForm>
 
   <ModalForm :isOpen="isEditModalOpen" title="Editar Tarea" @close="closeEditModal">
-    <TaskForm :task="taskToEdit || {}" :tags="tagStore.tags" @submitTask="updateTask"
-      @closeModal="closeEditModal" />
+    <TaskForm :task="taskToEdit || {}" :tags="tagStore.tags" @submitTask="updateTask" @closeModal="closeEditModal" />
   </ModalForm>
 </template>
 
@@ -140,11 +143,19 @@ const task = ref({
   dueDate: '',
 });
 
+const selectedOrder = ref('asc');
+
 const filteredTasks = computed(() => {
   let tasks = taskStore.tasks;
 
   if (selectedCategory.value !== 'Todas') {
     tasks = tasks.filter(task => task.categories?.includes(selectedCategory.value));
+  }
+
+  if (selectedOrder.value === 'asc') {
+    tasks.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  } else {
+    tasks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   return tasks;
