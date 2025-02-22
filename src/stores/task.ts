@@ -13,11 +13,10 @@ export const useTaskStore = defineStore('task', () => {
     }
   });
 
-  // Computed properties para tareas completadas y pendientes
   const completedTasks = computed(() => tasks.value.filter((task) => task.completed));
   const pendingTasks = computed(() => tasks.value.filter((task) => !task.completed));
 
-  // Simulación de llamada API (puedes implementarla si es necesario)
+  // Simulación de   llamada API (puedes implementarla si es necesario)
   async function fetchTasks() {
     loading.value = true;
     try {
@@ -63,13 +62,14 @@ export const useTaskStore = defineStore('task', () => {
     localStorage.removeItem('tasks');
   }
 
-  // En useTaskStore.ts
 function deleteTasksByCategory(category: string) {
   tasks.value = tasks.value.filter(task => !task.categories?.includes(category));
   localStorage.setItem('tasks', JSON.stringify(tasks.value));
 }
 
-  // En useTaskStore.ts
+const saveTasks = () => {
+  localStorage.setItem('tasks', JSON.stringify(tasks.value));
+};
   watch(
     tasks,
     (newTasks) => {
@@ -89,5 +89,6 @@ function deleteTasksByCategory(category: string) {
     updateTask,
     deleteTask,
     clearTasks,
+    saveTasks
   };
 });

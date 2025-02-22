@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 import type { Tag } from '@/components/interfaces/Tag';
+import { useTaskStore } from '@/stores/task';
 
 export const useTagStore = defineStore('tag', () => {
   const tags = ref<Tag[]>([]);
+  const taskStore = useTaskStore();
 
   const loadTags = () => {
     const storedTags = localStorage.getItem('tags');
@@ -28,16 +30,36 @@ export const useTagStore = defineStore('tag', () => {
     const tag = tags.value.find((tag) => tag.id === tagId);
     if (tag) {
       tag.name = newName;
+      localStorage.setItem('tags', JSON.stringify(tags.value));
+      updateTaskTags(); // Actualiza las tareas después de editar una etiqueta
     }
   };
 
   const deleteTag = (tagId: string) => {
-    tags.value = tags.value.filter((tag) => tag.id !== tagId);
+    const tag = tags.value.find((tag) => tag.id === tagId);
+    if (tag) {
+      tags.value = tags.value.filter((tag) => tag.id !== tagId);
+      localStorage.setItem('tags', JSON.stringify(tags.value));
+      updateTaskTags(tag.name); // Actualiza las tareas después de eliminar una etiqueta
+    }
   };
 
   const clearTags = () => {
     tags.value = [];
     localStorage.removeItem('tags');
+  };
+
+  const updateTaskTags = (deletedTagName?: string) => {
+    taskStore.tasks.forEach(task => {
+      if (deletedTagName) {
+        task.categories = task.categories.filter(category => category !== deletedTagName);
+      } else {
+        task.categories = task.categories.filter(category =>
+          tags.value.some(tag => tag.name === category)
+        );
+      }
+    });
+    taskStore.saveTasks(); // Asegúrate de guardar las tareas actualizadas
   };
 
   watch(

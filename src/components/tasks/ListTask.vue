@@ -37,7 +37,7 @@
               d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
           </svg>
-          {{ task.categories?.join(", ") || "Sin categoría" }}
+          {{ task.categories?.join(", ") || "Sin Etiqueta" }}
         </div>
       </div>
 
@@ -60,8 +60,6 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
           </svg>
-
-
         </div>
       </div>
     </div>
@@ -142,6 +140,7 @@ function updateTaskTags() {
       );
     }
   });
+  taskStore.saveTasks(); // Asegúrate de guardar las tareas actualizadas
 }
 
 defineProps({
@@ -201,6 +200,7 @@ function saveTask() {
   const index = taskStore.tasks.findIndex((t) => t.id === editTask.value.id);
   if (index !== -1) {
     taskStore.tasks[index] = { ...editTask.value };
+    taskStore.saveTasks(); // Asegúrate de guardar las tareas actualizadas
   }
   closeModal();
 }
@@ -231,6 +231,7 @@ function deleteTask(taskId: string) {
   const index = taskStore.tasks.findIndex((t) => t.id === taskId);
   if (index !== -1) {
     taskStore.tasks.splice(index, 1);
+    taskStore.saveTasks(); // Asegúrate de guardar las tareas actualizadas
   }
 }
 </script>
