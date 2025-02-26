@@ -140,7 +140,7 @@ function updateTaskTags() {
       );
     }
   });
-  taskStore.saveTasks(); // Asegúrate de guardar las tareas actualizadas
+  taskStore.saveTasks(); 
 }
 
 defineProps({

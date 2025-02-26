@@ -288,10 +288,19 @@ const clearSection = () => {
     confirmButtonText: 'Sí, eliminar',
   }).then((result) => {
     if (result.isConfirmed) {
-      taskStore.deleteTasksByCategory(selectedCategory.value);
+      tasksInCategory.forEach(task => {
+        const index = task.categories.indexOf(selectedCategory.value);
+        if (index !== -1) {
+          task.categories.splice(index, 1);
+          if (task.categories.length === 0) {
+            taskStore.deleteTask(task.id);
+          }
+        }
+      });
+      taskStore.saveTasks();
       Swal.fire(
         '¡Eliminadas!',
-        `Las tareas de la categoría "${selectedCategory.value}" han sido eliminadas.`,
+        `Las tareas de la categoría "${selectedCategory.value}" han sido actualizadas.`,
         'success'
       );
     }
